@@ -1,0 +1,97 @@
+\documentclass[we,final,11pt,oneside,openany]{uantwerpenbamathesis}
+% \documentclass[we,a4paper,11pt,twoside,openright]{uantwerpenbamathesis}
+
+\usepackage[english]{babel}
+
+%% this is just for some dummy text, please remove in your copy
+\usepackage{kantlipsum}
+\usepackage{natbib}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amssymb}
+\newcommand{\algorithmfootnote}[1]{\leavevmode\rlap{\footnotesize #1}\par}
+\usepackage{todonotes}
+\usepackage{float}
+
+%% this package allows to generate a PDF with clickable links
+\usepackage[backref,hyperindex=true,pagebackref=true]{hyperref}
+
+\usepackage{cleveref}
+%% as an example - loading some fonts, feel free to change
+\usepackage{mathptmx}
+\iftutex
+%% Just an example of font-scheme: this is in no way a recommended font
+%% scheme!
+\usepackage{fontspec}
+\setmainfont
+[UprightFont = *,
+ BoldFont = *b,
+ ItalicFont = *i,
+ BoldItalicFont = *z,
+]
+{calibri}
+\usepackage{sansmathaccent}
+\fi
+
+
+\bamadegree{we-en-ma-em}
+
+\title{Provide a title}
+
+\author{Inte Vleminckx}
+\supervisor{prof. dr. H. Vangheluwe}{UAntwerpen}
+\supervisor{R. Mittal, Doctoral Fellow}{UAntwerpen}
+
+\academicyear{2024 - 2025}
+
+%% you can specify a company logo
+%%\companylogo{\includegraphics[width=4.5cm,height=2.5cm,keepaspectratio]{companylogo.jpg}}
+
+\begin{document}
+
+%% creates the title page, remove if you don't want any
+\maketitle
+
+%% causes the first pages to be roman numbered
+\frontmatter
+
+%% sets the table of contents (automatically for you)
+\tableofcontents
+
+%% changes the numbering system to arabic and restart from 1
+\mainmatter
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+\chapter{Introduction}
+\label{ch:introduction}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+\chapter{Proposed Approach}
+\label{ch:proposed-approach}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+\chapter{Results}
+\label{ch:results}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+\chapter{Conclussion}
+\label{ch:conclussion}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+\appendix
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}
