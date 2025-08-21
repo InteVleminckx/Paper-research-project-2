@@ -1,0 +1,43 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.0.6 Chrome/138.0.7204.100 Electron/37.2.3 Safari/537.36" version="28.0.6">
+  <diagram name="Page-1" id="BxUdwOXLy1eESZ_2VtBd">
+    <mxGraphModel dx="922" dy="664" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="qDqQ_IUH-dekISA1hfqx-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="qDqQ_IUH-dekISA1hfqx-3" target="qDqQ_IUH-dekISA1hfqx-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qDqQ_IUH-dekISA1hfqx-12" value="New actuator setpoint" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="qDqQ_IUH-dekISA1hfqx-11">
+          <mxGeometry x="-0.0024" y="-3" relative="1" as="geometry">
+            <mxPoint y="7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qDqQ_IUH-dekISA1hfqx-3" value="Caculates new setpoint based on measured flow" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="240" y="360" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qDqQ_IUH-dekISA1hfqx-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="qDqQ_IUH-dekISA1hfqx-4" target="qDqQ_IUH-dekISA1hfqx-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="340" />
+              <mxPoint x="320" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qDqQ_IUH-dekISA1hfqx-10" value="Measured flow" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="qDqQ_IUH-dekISA1hfqx-9">
+          <mxGeometry x="-0.081" y="-3" relative="1" as="geometry">
+            <mxPoint x="-12" y="-7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qDqQ_IUH-dekISA1hfqx-4" value="Set received actuator setpoint and measure flow" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="480" y="360" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qDqQ_IUH-dekISA1hfqx-7" value="&lt;b&gt;Model&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="640" y="385" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="qDqQ_IUH-dekISA1hfqx-8" value="&lt;b&gt;Control loop&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="150" y="385" width="90" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
