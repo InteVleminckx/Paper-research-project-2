@@ -68,9 +68,6 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-\chapter{Introduction}
-\label{ch:introduction}
-
 The development of products in the heating, ventilation, and air conditioning (HVAC) industry presents significant challenges in testing and validation.
 Building physical prototypes for every design iteration is often costly and time-consuming.
 A promising alternative is to model the most expensive or complex components in a virtual environment, enabling early testing without full-scale prototypes.
@@ -96,6 +93,64 @@ Finally, we construct an advanced flow circuit model and benchmark SiL results a
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 \chapter{Proposed Approach}
 \label{ch:proposed-approach}
+
+\section{The First Steps}
+\label{sec:the-first-steps}
+
+To address the problem at hand, we must first establish a clear understanding of the overall problem statement.
+As outlined in the introduction, our goal is to test the control loop of a heating and ventilation system by modeling all physical elements and allowing the control loop to interact with this model.
+To achieve this, we need to define, as simply as possible, what the model requires as input from the control loop and what the control loop requires as input from the model, without yet considering detailed configuration parameters of the individual physical components.
+With this understanding in place, we can represent the interaction between the control loop and the model using the following diagram:
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Images/generated/simple-representation}
+    \caption{Simple represention of interaction between control loop and model}
+    \label{fig:simple-representation}
+\end{figure}
+
+Next, we provide a more detailed explanation of the process illustrated in \autoref{fig:simple-representation}.
+In this setup, the control loop receives a target flow setpoint.
+Although the source of this setpoint is not relevant to our study, it defines the desired flow rate in the circuit.
+To achieve this flow rate, the control loop calculates an actuator setpoint, which adjusts the valve opening to provide the required flow.
+In order to perform this calculation, the control loop must receive feedback from the model in the form of the measured flow in the circuit.
+By comparing the measured flow to the target flow, the control loop can determine the necessary actuator setpoint and adjust the valve position accordingly.
+
+With this simplified setup, we can construct a Modelica model that accepts one real-valued input and produces one real-valued output—the actuator setpoint and the measured flow, respectively.
+For testing purposes, we can initially provide fixed output values from the model to the control loop to observe how the actuator setpoint evolves over time.
+To enable full co-simulation, we must also determine how to establish interaction between the Modelica model and the control loop.
+The workflow for this process is as follows:
+\begin{enumerate}
+    \item Develop a simple Modelica model.
+    \item Investigate how the compiled control loop can be accessed and controlled using Python.
+    \item Integrate the Modelica model into the Python code so that the control loop can exchange data with the model in real time.
+\end{enumerate}
+
+\subsection{A Simple Modelica Model}
+\label{subsec:a-simple-modelica-model}
+
+A very simple Modelica model can be represented as shown in \autoref{fig:simple-modelica-model}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\linewidth]{Images/modelica/simple-representation}
+    \caption{A simplified model representatino}
+    \label{fig:simple-modelica-model}
+\end{figure}
+
+This model accepts an actuator setpoint as input and produces a measured flow as output, which is currently fixed at a value of 3 for testing purposes.
+
+\subsection{Interaction With The Control Loop}
+\label{subsec:interaction-with-the-control-loop}
+
+\subsection{Complete Intergration}
+\label{subsec:complete-integration}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+\chapter{Modelica Library Overview}
+\label{ch:modelica-library-overview}
+
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
