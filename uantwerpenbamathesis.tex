@@ -68,6 +68,29 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
+\chapter{Introduction}
+\label{ch:introduction}
+
+The development of products in the heating, ventilation, and air conditioning (HVAC) industry presents significant challenges in testing and validation.
+Building physical prototypes for every design iteration is often costly and time-consuming.
+A promising alternative is to model the most expensive or complex components in a virtual environment, enabling early testing without full-scale prototypes.
+This approach allows the evaluation of critical subsystems, particularly the control software that regulates HVAC systems.
+
+In this study, we investigate how to test the control loop of a heating and ventilation system by modeling all physical elements—such as the valve, the actuator controlling the valve, the flow sensor, the pipe network, and the pressure pump that generates the fluid flow.
+The control loop, which determines the actuator setpoint based on the flow sensor measurements, will interact with the virtual model using co-simulation techniques.
+To assess the feasibility and performance of this approach, we compare two testing strategies: Software-in-the-Loop (SiL), and Hardware-in-the-Loop (HiL).
+In SiL testing, the model interacts with a compiled version of the control loop running on a separate system, with all connections established virtually.
+In HiL testing, the model runs on one system while the control loop is executed on the actual embedded hardware used in the real setup, with physical connections between the two.
+
+Our methodology proceeds in stages.
+First, we develop a simple flow circuit in Modelica to demonstrate basic co-simulation capabilities.
+Using this model, we investigate how to integrate it with SiL and HiL environments.
+Once this foundation is established, we expand the Modelica component library with more detailed and realistic system elements.
+Finally, we construct an advanced flow circuit model and benchmark SiL results against HiL results to evaluate performance differences and validate the modeling approach.
+
+\todo{Inte: add what can be expected in each upcomming section in one sentece.}
+
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
