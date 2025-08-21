@@ -34,6 +34,22 @@
 \usepackage{sansmathaccent}
 \fi
 
+\lstdefinestyle{bashstyle}{
+  language=bash,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  rulecolor=\color{gray!60},
+  frameround=tttt,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!60!black}\itshape,
+  stringstyle=\color{orange},
+  showstringspaces=false,
+  breaklines=true,
+  columns=fullflexible,
+  captionpos=b,
+  keywords={\$}
+}
 
 \bamadegree{we-en-ma-em}
 
@@ -130,7 +146,7 @@ The workflow for this process is as follows:
 \label{subsec:a-simple-modelica-model}
 
 A very simple Modelica model can be represented as shown in \autoref{fig:simple-modelica-model}.
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=0.6\linewidth]{Images/modelica/simple-representation}
     \caption{A simplified model representatino}
@@ -141,6 +157,47 @@ This model accepts an actuator setpoint as input and produces a measured flow as
 
 \subsection{Interaction With The Control Loop}
 \label{subsec:interaction-with-the-control-loop}
+
+The first step in enabling interaction with the control loop is to compile the common platform—containing the control loop—into an executable.
+This common platform is implemented in C and is compiled using CMake.
+Due to privacy regulations of the company related to this study, the source code of the common platform cannot be shared.
+
+Once the executable is available, the next step is to establish a method for interacting with the common platform.
+There are two primary communication interfaces used by the platform:
+
+\begin{enumerate}
+    \item A Flow Sensor Board (FSB), which emulates the behavior of a real flow sensor using a UART connection.
+    \item A Modbus interface, which allows reading registers from the embedded control board using a TCP connection.
+\end{enumerate}
+
+In the case of Software-in-the-Loop (SiL) testing, the common platform is executed locally.
+A mock Modbus connection is created to replicate the behavior of a physical Modbus link to an embedded board.
+To keep the discussion focused, we first consider only the SiL setup.
+A schematic representation of this communication is shown in \autoref{fig:common-platform-communication}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Images/generated/common-platform-communication}
+    \caption{Overview communication with common platform}
+    \label{fig:common-platform-communication}
+\end{figure}
+
+To enable this interaction, we must first create virtual serial ports that allow communication with the common platform.
+This can be achieved using the following commands:
+
+\begin{lstlisting}[style=bashstyle, caption={Creating virtual ports for communication}]
+$ sudo socat -d -d pty,link=/dev/ttyV1,raw,echo=0 pty,link=/dev/ttyV2,raw,echo=0
+$ sudo chmod 777 /dev/ttyV1 && sudo chmod 777 /dev/ttyV2 && \
+sudo socat -d -d -u OPEN:/dev/ttyV1,raw tcp:localhost:8888,reuseaddr
+\end{lstlisting}
+
+This configuration uses socat to create a pair of virtual serial ports and forward data through a TCP socket.
+First, it establishes two pseudo-terminal devices—/dev/ttyV1 and /dev/ttyV2—which function as the two ends of a virtual null-modem cable: any data written to one port immediately appears on the other.
+Next, their permissions are updated to allow unrestricted access, and a second socat process forwards all data received on /dev/ttyV1 to a TCP connection on port 8888.
+
+The last part is to those ports using python, such that we can interact with the common platform using python code.
+\todo{Go futher from here, talk about how we connect to the ports using the python Uart and TCP code}
+
 
 \subsection{Complete Intergration}
 \label{subsec:complete-integration}
