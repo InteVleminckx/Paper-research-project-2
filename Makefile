@@ -7,5 +7,5 @@ all:
 	pdflatex $(MAIN).tex
 
 clean:
-	rm -rf $(MAIN).aux $(MAIN).out $(MAIN).log $(MAIN).toc 
+	rm -rf $(MAIN).aux $(MAIN).out $(MAIN).log $(MAIN).toc $(MAIN).bbl $(MAIN).brf $(MAIN).blg
 
