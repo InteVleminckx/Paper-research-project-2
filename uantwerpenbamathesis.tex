@@ -14,6 +14,9 @@
 \usepackage{todonotes}
 \usepackage{float}
 \usepackage{subcaption}
+\usepackage{dirtree}
+\usepackage{mwe}
+\usepackage{wrapfig}
 
 %% this package allows to generate a PDF with clickable links
 \usepackage[backref,hyperindex=true,pagebackref=true]{hyperref}
@@ -312,13 +315,183 @@ These results confirm that the control loop correctly receives the measured flow
 This demonstrates that the minimal setup functions as intended: all components successfully interact with one another.
 With this validation in place, the next step is to extend the Modelica components to simulate a complete flow circuit and enhance the Python code to support the expanded system.
 
-
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 \chapter{Modelica Library Overview}
 \label{ch:modelica-library-overview}
 
+In this study, a flow circuit consists of several interconnected components, including a pressure pump, pipes with bends, and the primary unit, Dynamx, which integrates a valve, a flow sensor, and a linear actuator to regulate the valve position.
+To facilitate the construction of such flow circuits, all components must be modeled in a modular and user-friendly way.
+For this purpose, additional packages have been introduced into our Modelica library, including a configuration block and a set of base component models.
+An overview of the most relevant packages and models in the library is provided in the following sections.
+
+\section{Actuators}
+\label{sec:actuators}
+
+\subsection{Actuator}
+\label{subsec:actuators}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/actuator}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\section{Valves}
+\label{sec:valves}
+
+\subsection{Linear Valve}
+\label{subsec:linear-valve}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/linear-valve}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\subsection{Equalpercentage Valve}
+\label{subsec:equalpercentage-valve}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/equi-valve}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\section{Pumps}
+\label{sec:pumps}
+
+\subsection{Pressure Pump}
+\label{subsec:pressure-pump}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/pressure-pump}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\section{Sensors}
+\label{sec:sensors}
+
+\subsection{Flow Sensor}
+\label{subsec:flow-sensor}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/flow-sensor}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\section{Pipes}
+\label{sec:pipes}
+
+\subsection{Pipe}
+\label{subsec:pipe}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/pipe}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\subsection{Bend}
+\label{subsec:bend}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/bend}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\section{Dynamx}
+\label{sec:dynamx}
+
+\subsection{Linear Valve and Actuator}
+\label{subsec:linear-valve-and-actuator}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/dynamx}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\subsection{Equalpercentage Valve and Actuator}
+\label{subsec:equalpercentage-valve-and-actuator}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/dynamx}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\section{Base Components}
+\label{sec:base-components}
+
+\subsection{Base Flow Model}
+\label{subsec:base-flowmodel}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/flow-model-base}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\subsection{Base Dynamx}
+\label{subsec:base-dynamx}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/dynamx}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\subsection{Base Pipe Networks}
+\label{subsec:base-pipe-networks}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/pipe-network}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\subsection{Base Fluid}
+\label{subsec:base-fluid}
+
+\lipsum[67]
+
+\section{Pipe Networks}
+\label{sec:pipe-networks}
+
+\subsection{Simple Network}
+\label{subsec:simple-network}
+
+\begin{wrapfigure}{R}{0.15\textwidth}
+    \centering
+    \includegraphics[width=0.15\textwidth]{Images/components/pipe-network}
+\end{wrapfigure}
+
+\lipsum[67]
+
+\section{Configurations}
+\label{sec:configurations}
+
+\subsection{Configuration}
+\label{subsec:configuration}
+
+\lipsum[67]
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
