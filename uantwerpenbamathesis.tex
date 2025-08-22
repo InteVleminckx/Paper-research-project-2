@@ -13,6 +13,7 @@
 \newcommand{\algorithmfootnote}[1]{\leavevmode\rlap{\footnotesize #1}\par}
 \usepackage{todonotes}
 \usepackage{float}
+\usepackage{subcaption}
 
 %% this package allows to generate a PDF with clickable links
 \usepackage[backref,hyperindex=true,pagebackref=true]{hyperref}
@@ -49,6 +50,22 @@
   columns=fullflexible,
   captionpos=b,
   keywords={\$}
+}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  rulecolor=\color{gray!60},
+  frameround=tttt,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!60!black}\itshape,
+  stringstyle=\color{green!60!black},
+  showstringspaces=false,
+  breaklines=true,
+  columns=fullflexible,
+  captionpos=b
 }
 
 \bamadegree{we-en-ma-em}
@@ -195,12 +212,106 @@ This configuration uses socat to create a pair of virtual serial ports and forwa
 First, it establishes two pseudo-terminal devices—/dev/ttyV1 and /dev/ttyV2—which function as the two ends of a virtual null-modem cable: any data written to one port immediately appears on the other.
 Next, their permissions are updated to allow unrestricted access, and a second socat process forwards all data received on /dev/ttyV1 to a TCP connection on port 8888.
 
-The last part is to those ports using python, such that we can interact with the common platform using python code.
-\todo{Go futher from here, talk about how we connect to the ports using the python Uart and TCP code}
+The final step is to connect to the virtual ports from Python, enabling direct interaction with the common platform through Python code.
 
+To achieve this, we use two Python modules:
+\begin{enumerate}
+    \item The serial module.
+    \item The ModbusTcpClient module from the pymodbus.client library.
+\end{enumerate}
 
-\subsection{Complete Intergration}
+The serial module is used to implement the Flow Sensor Board (FSB) mock.
+For this purpose, we create a PeriodicPacket class that encapsulates all the data expected by the common platform from a real FSB.
+This packet is serialized into a byte format compatible with the common platform and transmitted over the serial connection via /dev/ttyV2.
+
+The ModbusTcpClient module is used to implement the Modbus mock.
+This allows us to read and write registers that correspond to specific data points within the common platform.
+The Modbus client runs on localhost with port 8080.
+
+Using this setup, we can send new flow measurements to the common platform by updating the PeriodicPacket and transmitting it over the serial connection.
+Additionally, by accessing the appropriate registers, we can read the actuator setpoint calculated by the common platform and write new flow setpoints directly into the system.
+
+\subsection{Complete Integration}
 \label{subsec:complete-integration}
+
+To complete the integration, we must also interact with the Modelica model developed earlier.
+
+The first step is to export the Modelica model so that it can be integrated into Python.
+This is achieved by exporting the model as a Functional Mock-up Unit (FMU).
+Since we intend to perform co-simulation, the FMU export must explicitly be configured for co-simulation mode rather than model-exchange mode.
+
+Several Python libraries support FMU-based simulation, but not all of them allow for co-simulation with externally controlled simulation steps.
+Step control is essential because we need to dynamically update the model inputs and retrieve outputs during execution, ensuring synchronization with the common platform.
+For this reason, we select the fmpy library, which provides full co-simulation capabilities and fine-grained step control.
+
+With this functionality in place, the final task is to design a simulation loop that integrates all components, ensuring seamless data exchange between the Modelica model and the common platform.
+Before proceeding to implementation, we present a schematic diagram in \autoref{fig:full-communication} summarizing the complete interaction setup.
+This diagram highlights the data flow between all components and clarifies which elements produce or consume specific signals.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Images/generated/full-communication.drawio}
+    \caption{Total interaction overview between all components}
+    \label{fig:full-communication}
+\end{figure}
+
+We observe that this diagram extends \autoref{fig:common-platform-communication}, with the orchestrator managing the communication between the common platform and the FMU.
+The simulation loop, capturing all interactions, is implemented as follows:
+
+\begin{lstlisting}[style=pythonstyle, caption={Simulation loop}]
+def run(self):
+    performed_step = True
+
+    # user input value
+    s_flow = 0.0
+    self._modbus.set_setpoint_flow(s_flow)
+
+    while performed_step:
+        time = self._model.current_time
+
+        # Update measured flow
+        m_flow = self._model.get_measured_flow()
+        self._fsb.update_flow(m_flow)
+
+        # Update model with new setpoint
+        s_motor = self._modbus.get_setpoint_motor()
+        self._model.set_setpoint_motor(s_motor)
+
+        self._update_trace(time, m_flow, s_flow, s_motor)
+
+        # Perform a step in the model
+        performed_step = self._model.perform_step()
+\end{lstlisting}
+
+For testing purposes, the simulation loop is deliberately kept simple.
+First, the measured flow is retrieved from the Modelica model and passed to the FSB, which transmits the corresponding packet to the common platform.
+Next, the motor setpoint is read from its Modbus register and sent back to the Modelica model.
+A trace of the key variables is recorded to enable visualization, and finally, the model performs a single simulation step.
+
+To verify correct operation, two test cases are executed: one with the flow setpoint s\_flow = 2.0 and another with s\_flow = 0.0.
+The objective is to confirm that the common platform’s control loop generates different motor positions depending on whether the flow setpoint is above or below the fixed measured flow value provided by the Modelica model (which is constant at 1.0 in this scenario).
+
+\begin{figure}[h!]
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=.8\linewidth]{Images/simulations/simple_simulation_0}
+        \caption{Simple simulation with s\_flow = 0.0}
+        \label{fig:simple-sim-0}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=.8\linewidth]{Images/simulations/simple_simulation_2}
+        \caption{Simple simulation with s\_flow = 2.0}
+        \label{fig:simple-sim-2}
+    \end{subfigure}
+\end{figure}
+
+As shown in \autoref{fig:simple-sim-0}, the motor setpoint is calculated as 0 when s\_flow = 0, whereas in \autoref{fig:simple-sim-2}, the motor setpoint is 5 when s\_flow = 2.0, both evaluated against a fixed measured flow of 1.0.
+These results confirm that the control loop correctly receives the measured flow and computes the motor setpoint accordingly.
+
+This demonstrates that the minimal setup functions as intended: all components successfully interact with one another.
+With this validation in place, the next step is to extend the Modelica components to simulate a complete flow circuit and enhance the Python code to support the expanded system.
+
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
