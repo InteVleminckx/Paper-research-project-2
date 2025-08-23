@@ -127,11 +127,8 @@ Finally, we construct an advanced flow circuit model and benchmark SiL results a
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
-\chapter{Proposed Approach}
-\label{ch:proposed-approach}
-
-\section{The First Steps}
-\label{sec:the-first-steps}
+\chapter{The First Steps}
+\label{ch:the-first-steps}
 
 To address the problem at hand, we must first establish a clear understanding of the overall problem statement.
 As outlined in the introduction, our goal is to test the control loop of a heating and ventilation system by modeling all physical elements and allowing the control loop to interact with this model.
@@ -162,8 +159,10 @@ The workflow for this process is as follows:
     \item Integrate the Modelica model into the Python code so that the control loop can exchange data with the model in real time.
 \end{enumerate}
 
-\subsection{A Simple Modelica Model}
-\label{subsec:a-simple-modelica-model}
+\newpage
+
+\section{A Simple Modelica Model}
+\label{sec:a-simple-modelica-model}
 
 A very simple Modelica model can be represented as shown in \autoref{fig:simple-modelica-model}.
 \begin{figure}[h!]
@@ -175,8 +174,8 @@ A very simple Modelica model can be represented as shown in \autoref{fig:simple-
 
 This model accepts an actuator setpoint as input and produces a measured flow as output, which is currently fixed at a value of 3 for testing purposes.
 
-\subsection{Interaction With The Control Loop}
-\label{subsec:interaction-with-the-control-loop}
+\section{Interaction With The Control Loop}
+\label{sec:interaction-with-the-control-loop}
 
 The first step in enabling interaction with the control loop is to compile the common platform—containing the control loop—into an executable.
 This common platform is implemented in C and is compiled using CMake.
@@ -211,6 +210,8 @@ $ sudo chmod 777 /dev/ttyV1 && sudo chmod 777 /dev/ttyV2 && \
 sudo socat -d -d -u OPEN:/dev/ttyV1,raw tcp:localhost:8888,reuseaddr
 \end{lstlisting}
 
+\newpage
+
 This configuration uses socat to create a pair of virtual serial ports and forward data through a TCP socket.
 First, it establishes two pseudo-terminal devices—/dev/ttyV1 and /dev/ttyV2—which function as the two ends of a virtual null-modem cable: any data written to one port immediately appears on the other.
 Next, their permissions are updated to allow unrestricted access, and a second socat process forwards all data received on /dev/ttyV1 to a TCP connection on port 8888.
@@ -234,8 +235,10 @@ The Modbus client runs on localhost with port 8080.
 Using this setup, we can send new flow measurements to the common platform by updating the PeriodicPacket and transmitting it over the serial connection.
 Additionally, by accessing the appropriate registers, we can read the actuator setpoint calculated by the common platform and write new flow setpoints directly into the system.
 
-\subsection{Complete Integration}
-\label{subsec:complete-integration}
+\newpage
+
+\section{Complete Integration}
+\label{sec:complete-integration}
 
 To complete the integration, we must also interact with the Modelica model developed earlier.
 
@@ -261,13 +264,12 @@ This diagram highlights the data flow between all components and clarifies which
 We observe that this diagram extends \autoref{fig:common-platform-communication}, with the orchestrator managing the communication between the common platform and the FMU.
 The simulation loop, capturing all interactions, is implemented as follows:
 
+\newpage
+
 \begin{lstlisting}[style=pythonstyle, caption={Simulation loop}]
 def run(self):
     performed_step = True
-
-    # user input value
-    s_flow = 0.0
-    self._modbus.set_setpoint_flow(s_flow)
+    self._modbus.set_setpoint_flow(0.0)
 
     while performed_step:
         time = self._model.current_time
@@ -326,6 +328,55 @@ To facilitate the construction of such flow circuits, all components must be mod
 For this purpose, additional packages have been introduced into our Modelica library, including a configuration block and a set of base component models.
 An overview of the most relevant packages and models in the library is provided in the following sections.
 
+
+\section{Configurations}
+\label{sec:configurations}
+
+\subsection{Configuration}
+\label{subsec:configuration}
+
+The Configuration model must be included in the flow model and should always be named config (this is also the default name).
+This model defines the parameters used to configure the actuator, Dynamx, and valve components.
+By using this configuration model, parameter values for all components in the flow model can be conveniently adjusted directly from the Python code.
+For this reason, the name config is important, as it allows the Python interface to reliably locate the configuration model.
+We will discuss this in more detail in \autoref{ch:python-interface}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|lcl|}
+\hline
+\multicolumn{1}{|l|}{\textbf{Parameter}}     & \multicolumn{1}{c|}{\textbf{Unit}} & \textbf{Description}                                     \\ \hline
+\multicolumn{3}{|l|}{\textit{Dynamx settings - Actuator}}                                                                                    \\ \hline
+\multicolumn{1}{|l|}{min\_motor\_position}   & \multicolumn{1}{c|}{-}             & The minimum position of the actuator                     \\ \hline
+\multicolumn{1}{|l|}{max\_motor\_position}   & \multicolumn{1}{c|}{-}             & The maximum position of the actuator                     \\ \hline
+\multicolumn{1}{|l|}{start\_motor\_position} & \multicolumn{1}{c|}{-}             & The start position of the actuator                       \\ \hline
+\multicolumn{1}{|l|}{total\_opening\_time}   & \multicolumn{1}{c|}{s}             & Time to reach maximum position from its minimum          \\ \hline
+\multicolumn{1}{|l|}{total\_closing\_time}   & \multicolumn{1}{c|}{s}             & Time to reach minimum position from its maximum          \\ \hline
+\multicolumn{3}{|l|}{\textit{Dynamx settings - Valve}}                                                                                       \\ \hline
+\multicolumn{1}{|l|}{valve\_diameter}        & \multicolumn{1}{c|}{mm}            & Diameter of the pipe of the valve                        \\ \hline
+\multicolumn{1}{|l|}{max\_valve\_flow\_rate} & \multicolumn{1}{c|}{kg/s}          & Maximun flow rate of the valve at full opening           \\ \hline
+\multicolumn{3}{|l|}{\textit{Dynamx settings - Valve (if equal percentage)}}                                                                 \\ \hline
+\multicolumn{1}{|l|}{leakage}                & \multicolumn{1}{c|}{l}             & Valve leakage                                            \\ \hline
+\multicolumn{1}{|l|}{R}                      & \multicolumn{1}{c|}{-}             & Reangeability, between 50 and 100 typically              \\ \hline
+\multicolumn{1}{|l|}{delta0}                 & \multicolumn{1}{c|}{-}             & Range of significant deviation from equal percentage law \\ \hline
+\multicolumn{1}{|l|}{deltaM}                 & \multicolumn{1}{c|}{-}             & Fraction of nominal flow rate where linearization starts \\ \hline
+\multicolumn{3}{|l|}{\textit{Pump settings}}                                                                                                 \\ \hline
+\multicolumn{1}{|l|}{pump\_pressure}         & \multicolumn{1}{c|}{pa}            & The pressure of the pump                                 \\ \hline
+\end{tabular}
+\caption{All configuration parameters}
+\label{tab:config-table}
+\end{table}
+
+\newpage
+
+\autoref{tab:config-table} lists all configurable parameters for the different components.
+Most of these parameters are overwritten when setting up the simulation in Python.
+The table also contains a section that applies only when an equal percentage valve is used.
+This distinction arises because linear valves and equal percentage valves require different configuration parameters.
+When creating the Modelica model, you can select a checkbox to make these parameters editable.
+Note, however, that these valve-specific parameters cannot be modified through Python.
+Default values are provided, but any changes must be made directly in the Modelica model itself.
+
 \section{Actuators}
 \label{sec:actuators}
 
@@ -337,7 +388,23 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/actuator}
 \end{wrapfigure}
 
-\lipsum[67]
+The Actuator model represents a standard linear actuator.
+In addition to the configurable parameters described in \autoref{subsec:configuration}, the actuator features one input and two outputs: the input is setpoint\_motor, and the outputs are norm\_motor\_position and motor\_position.
+Given a motor setpoint, the actuator adjusts its position over time to reach the desired value.
+This motion is governed by two timing parameters: motor\_opening\_time and motor\_closing\_time.
+When the actuator is at a given position and receives a new setpoint, it transitions to the new position at a rate proportional to these timing parameters.
+Since the valve models expect the motor position to be normalized between 0 and 1, the input setpoint must be normalized using:
+
+\[
+setpoint_n = \frac{setpoint\_motor - min\_motor\_position}{max\_motor\_position - min\_motor\_position}
+\]
+
+From this normalized value, the actuator computes a new normalized motor position, norm\_motor\_position, which serves as the input to the valve models.
+To recover the denormalized motor position, motor\_position, the following denormalization is applied:
+\[
+motor\_position = norm\_motor\_position \cdot (max\_motor\_position - min\_motor\_position) + min\_motor\_position
+\]
+
 
 \section{Valves}
 \label{sec:valves}
@@ -350,7 +417,13 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/linear-valve}
 \end{wrapfigure}
 
-\lipsum[67]
+The LinearValve model serves primarly as a wrapper around the ValveIncompressible model from the Modelica.Fluid.Valves library.
+This abstraction simplifies integration by pre-configuring all relevant parameters, allowing the linear valve to be easily added to flow models without additional setup.
+
+In addition to the configurable parameters described in \autoref{subsec:configuration}, the linear valve features two inputs and one output: the inputs are motor\_position and port\_a, and the output is port\_b.
+The motor\_position receives the normalized motor position from the actuator, port\_a and port\_b are the ends of the fluid connection constructing the flow path.
+
+\newpage
 
 \subsection{Equalpercentage Valve}
 \label{subsec:equalpercentage-valve}
@@ -360,7 +433,12 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/equi-valve}
 \end{wrapfigure}
 
-\lipsum[67]
+The EqualPercentageValve models serves primarily as wrapper around the TwoWayEqualPercentage model from the Buildings.Fluid.Actuators library.
+This abstraction simplifies integration by pre-configuring all relevant parameters, allowing the equal percentage valve to be easily added to flow models without additional setup.
+
+Similar to the linear valve, the equal percentage valve includes, in addition to the configurable parameters described in \autoref{subsec:configuration}, two inputs and one output.
+The inputs are motor\_position and port\_a, while the output is port\_b.
+The motor\_position receives the normalized motor position from the actuator, port\_a and port\_b are the ends of the fluid connection constructing the flow path.
 
 \section{Pumps}
 \label{sec:pumps}
@@ -373,7 +451,12 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/pressure-pump}
 \end{wrapfigure}
 
-\lipsum[67]
+The PressurePump model serves also primarily as a wrapper around the FlowControlled\_dp model from the Buildings.Fluid.Movers library.
+This abstraction simplifies integration by pre-configuring all relevant parameters, allowing the pressure pump to be easily added to flow models without additional setup.
+
+In addition to the configurable parameters described in \autoref{subsec:configuration}, the pressure pump features one input and one output: the input is port\_a, and the output is port\_b.
+These are the ends of the fluid connection constructing the flow path.
+
 
 \section{Sensors}
 \label{sec:sensors}
@@ -386,7 +469,13 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/flow-sensor}
 \end{wrapfigure}
 
-\lipsum[67]
+The FlowSensor model serves also primarily as a wrapper around the VolumeFlowRate model from the Modelica.Fluid.Sensors library.
+This abstraction simplifies integration by pre-configuring all relevant parameters, allowing the flow sensor to be easily added to flow models without additional setup.
+
+Furthermore, since the VolumeFlowRate model provides its output in cubic meters per second $(m^{3}/s)$, the value is multiplied by 3600 to convert it to cubic meters per hour $(m^3 /h)$.
+
+The flow sensor has one input and two outputs: the input is port\_a, and the outputs are flow\_rate and port\_b.
+The flow\_rate is the measured flow and port\_a and port\_b are the ends of the fluid connection constructing the flow path.
 
 \section{Pipes}
 \label{sec:pipes}
@@ -399,7 +488,25 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/pipe}
 \end{wrapfigure}
 
-\lipsum[67]
+The Pipe model serves also primarily as a wrapper around the StaticPipe model from the Modelica.Fluid.Pipes library.
+This abstraction simplifies integration by pre-configuring all relevant parameters, allowing the pipe to be easily added to flow models without additional setup.
+
+Furthermore, when placing a pipe, a few parameters have to be set as shown in \autoref{tab:parameters-pipe}.
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|lcl|}
+        \hline
+        \multicolumn{1}{|l|}{\textbf{Parameter}}     & \multicolumn{1}{c|}{\textbf{Unit}} & \textbf{Description}                                                                    \\ \hline
+        \multicolumn{1}{|l|}{height}                 & \multicolumn{1}{c|}{mm}            & The length of the pipe                                                                  \\ \hline
+        \multicolumn{1}{|l|}{diameter}               & \multicolumn{1}{c|}{mm}            & The diameter of the pipe                                                                \\ \hline
+        \multicolumn{1}{|l|}{height\_ab}             & \multicolumn{1}{c|}{mm}            & The elevation of the pipe, such that $height\_ab = height_{port\_b} - height_{port\_a}$ \\ \hline
+    \end{tabular}
+    \caption{Parameters pipe}
+    \label{tab:parameters-pipe}
+\end{table}
+
+The pipe has one input and one output: the input is port\_a, and the output is port\_b.
+These are the ends of the fluid connection constructing the flow path.
 
 \subsection{Bend}
 \label{subsec:bend}
@@ -409,7 +516,25 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/bend}
 \end{wrapfigure}
 
-\lipsum[67]
+The Bend model serves also primarily as a wrapper around the EdgedBend model from the Modelica.Fluid.Fittings.Bends library.
+
+Furthermore, when placing a bend, a few parameters have to be set as shown in \autoref{tab:parameters-bend}.
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|lcl|}
+        \hline
+        \multicolumn{1}{|l|}{\textbf{Parameter}}     & \multicolumn{1}{c|}{\textbf{Unit}} & \textbf{Description}     \\ \hline
+        \multicolumn{1}{|l|}{angle}                  & \multicolumn{1}{c|}{degrees}       & The angle of the bend    \\ \hline
+        \multicolumn{1}{|l|}{bend}                   & \multicolumn{1}{c|}{m}             & The diameter of the pipe \\ \hline
+    \end{tabular}
+    \caption{Parameters bend}
+    \label{tab:parameters-bend}
+\end{table}
+
+The bend has one input and one output: the input is port\_a, and the output is port\_b.
+These are the ends of the fluid connection constructing the flow path.
+
+\newpage
 
 \section{Dynamx}
 \label{sec:dynamx}
@@ -422,17 +547,18 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/dynamx}
 \end{wrapfigure}
 
-\lipsum[67]
+The LinearDefaultActuator model combines the functionalities of the Actuator, LinearValve, and FlowSensor into a single Dynamx component.
+This model extends the Components.BaseComponents.DynamxBase model.
+To create a custom Dynamx model, it is recommended to also extend the Components.BaseComponents.DynamxBase model.
+The parameters of a Dynamx model should be configured using the Configuration model.
+
+In addition to the configurable parameters described in \autoref{subsec:configuration}, the dynamx models features two inputs and three outputs: the inputs are motor\_setpoint and port\_a, and the outputs are motor\_position, flow\_rate and port\_b.
+The motor\_setpoint is the setpoint for the actuator, motor\_position is the calculated motor position by the actuator, flow\_rate is the measured flow rate by the flow sensor, and port\_a and port\_b are the ends of the fluid connection constructing the flow path.
 
 \subsection{Equalpercentage Valve and Actuator}
 \label{subsec:equalpercentage-valve-and-actuator}
 
-\begin{wrapfigure}{R}{0.15\textwidth}
-    \centering
-    \includegraphics[width=0.15\textwidth]{Images/components/dynamx}
-\end{wrapfigure}
-
-\lipsum[67]
+The EqualPercentageDefaultActuator component is nearly identical to the LinearDefaultActuator, except that it uses the EqualPercentageValve instead of the LinearValve.
 
 \section{Base Components}
 \label{sec:base-components}
@@ -445,7 +571,11 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/flow-model-base}
 \end{wrapfigure}
 
-\lipsum[67]
+When creating a new flow model, it is recommended to extend it from FlowModelBase.
+This base model automatically provides all required inputs, outputs, and the configuration model with the correct predefined names.
+
+By doing so, naming errors and missing interfaces or components are avoided.
+Consistent naming is essential because the Python interface relies on specific names to locate inputs, outputs, and components within the model.
 
 \subsection{Base Dynamx}
 \label{subsec:base-dynamx}
@@ -455,7 +585,13 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/dynamx}
 \end{wrapfigure}
 
-\lipsum[67]
+All Dynamx models should extend this base model.
+Similar to \texttt{FlowModelBase}, it automatically provides all required inputs and outputs.
+In addition, a flow sensor is already included in the base model.
+
+As a result, when creating a new Dynamx model, the user only needs to add a valve and an actuator.
+Currently, all possible combinations of valves and actuators are already provided.
+However, if new actuators or valves with different characteristics are introduced in the future, new Dynamx components can be easily created by extending this base model.
 
 \subsection{Base Pipe Networks}
 \label{subsec:base-pipe-networks}
@@ -465,12 +601,23 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/pipe-network}
 \end{wrapfigure}
 
-\lipsum[67]
+The final relevant base component is PipeNetworkBase.
+When constructing a new network of pipes and bends, it should be extended from this component.
+The PipeNetworkBase provides two inputs (input\_pump and input\_valve) and two outputs (output\_pump and output\_valve).
 
-\subsection{Base Fluid}
-\label{subsec:base-fluid}
+These connections are defined such that input\_pump links to port\_a of the pump and output\_pump to port\_b of the pump, with analogous connections for the valve.
+This design ensures that the overall flow model consists of only three main components: a pipe network, a pressure pump, and a Dynamx component.
 
-\lipsum[67]
+With this structure, modifying the pipe network requires changes only to the pipe network model itself—no outer connections need to be altered.
+An example showing the connection between the pipe network, pressure pump, and Dynamx component is provided in \autoref{fig:example-pipe-network-connection}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.4\linewidth]{Images/components/example_connection_pipe_network}
+    \caption{Example connection between pipe network, pressure pump and Dynamx component}
+    \label{fig:example-pipe-network-connection}
+\end{figure}
+
 
 \section{Pipe Networks}
 \label{sec:pipe-networks}
@@ -483,15 +630,140 @@ An overview of the most relevant packages and models in the library is provided 
     \includegraphics[width=0.15\textwidth]{Images/components/pipe-network}
 \end{wrapfigure}
 
-\lipsum[67]
+As an example of a pipe network, a simple reference model has been created to illustrate how the flow connections should be made.
+This network contains a single pipe, where output\_valve is connected to port\_a of the pipe, and port\_b is connected to input\_pump.
+Additionally, output\_pump is directly connected to input\_valve.
 
-\section{Configurations}
-\label{sec:configurations}
+This configuration results in the following connection sequence: dynamx $\rightarrow$ pipe $\rightarrow$ pressure pump $\rightarrow$ dynamx.
 
-\subsection{Configuration}
-\label{subsec:configuration}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+\chapter{Python Interface}
+\label{ch:python-interface}
 
-\lipsum[67]
+The Python interface is centered around a main orchestrator class, Simulation, as described in \autoref{sec:complete-integration}.
+In addition to this main class, the interface contains three subcomponents: FSBMock, Modbus, and Model.
+\begin{itemize}
+    \item The FSBMock class handles the functionality of the FSB.
+    \item The Modbus class manages all Modbus-related functionality.
+    \item The Model class is responsible for all Modelica-related operations.
+\end{itemize}
+
+Each of these classes has a corresponding configuration dataclass: FSBConfig, ModbusConfig, and ModelConfig.
+While could not specify the configuration the Modbus due some privacy regelations \todo{Ask this, maybe it doesn't matter that much}, the ModelConfig and FSBConfig dataclass are described in detail.
+
+The ModelConfig dataclass contains the following fields:
+\begin{lstlisting}[style=pythonstyle, caption={ModelConfig data fields}]
+@dataclass
+class ModelConfig:
+    fmu_path: str
+    start_time: float
+    stop_time: float
+    step_size: float
+    min_motor_position: int
+    max_motor_position: int
+    start_motor_position: int
+    total_opening_time: int
+    total_closing_time: int
+    pump_pressure: float
+    valve_diameter: int
+    max_valve_flow_rate: float
+\end{lstlisting}
+
+All fields except the first four correspond to the parameters defined in the Modelica Configuration model, as listed in \autoref{tab:config-table}.
+The first four fields are specific to the simulation setup:
+\begin{itemize}
+    \item fmu\_path: the file path to the FMU of the flow model.
+    \item start\_time: the simulation start time.
+    \item stop\_time: the simulation stop time.
+    \item step\_size: the time increment for each simulation step.
+\end{itemize}
+
+These fields allow the Python interface to fully define and control the simulation while mapping the relevant Modelica parameters through ModelConfig.
+
+The FSBConfig dataclass contains the following fields:
+
+\begin{lstlisting}[style=pythonstyle, caption={FSBConfig data fields}]
+@dataclass
+class FSBConfig:
+    port: str
+    flow_send_rate: float
+\end{lstlisting}
+
+The port of the FSBConfig corresponds to the port used for the UART connection, as discussed in \autoref{sec:interaction-with-the-control-loop}.
+The flow\_send\_rate is utilized in the simulation loop.
+In the real-world application, the control loop expects a measurement from the FSB every x seconds.
+To accurately test the control loop, the simulation must send a measurement at the same interval.
+The detailed mechanism of this process is explained in Section \autoref{sec:complete-integration-extended}.
+By using such a send rate, the simulation mirrors the timing of a real-life test case, ensuring realistic interaction with the control loop.
+
+\section{Complete Integration Extended}
+\label{sec:complete-integration-extended}
+
+Now that we have implemented additional components in Modelica and aim for our simulation to reflect real-world behavior, it is necessary to extend the simulation loop to make it suitable for performing test simulations.
+
+\begin{lstlisting}[style=pythonstyle, caption={Extended simulation loop}]
+def run(self, setpoints: list[Tuple[float, float]]):
+    performed_step = True
+    p_bar = tqdm(total=self._total_iters, desc="Simulation Progress")
+    s_flow = self._model.get_measured_flow()
+    while performed_step:
+        p_bar.update(1)
+        # Update measured flow
+        m_flow = self._model.get_measured_flow()
+        self._fsb.update_flow(m_flow)
+        # Update setpoint flow
+        time = self._model.current_time
+        new_s_flow, setpoints = self._get_setpoint_flow(setpoints, time)
+        if new_s_flow:
+            s_flow = new_s_flow
+            self._modbus.set_setpoint_flow(s_flow)
+        # Update setpoint motor
+        s_motor = self._modbus.get_setpoint_motor()
+        self._model.set_setpoint_motor(s_motor)
+        # Retrieve motor position
+        motor_pos = self._model.get_motor_position()
+        # Update the trace
+        self._update_trace(time, m_flow, motor_pos, s_flow, s_motor)
+        # Perform a step
+        performed_step = self._model.perform_step()
+        # If operations are faster than the sample rate of the fsb, wait
+        self._fsb.tick()
+    p_bar.close()
+
+--- Example input:
+sim = Simulation(fsb_config, modbus_config, model_config)
+setpoints = [(0.0, 1.0), (200.0, 1.5)]
+sim.run(setpoints)
+\end{lstlisting}
+
+This extended simulation loop introduces several enhancements:
+\begin{itemize}
+    \item Setpoint input: Unlike the basic simulation loop, this version accepts a list of setpoints. As illustrated in \autoref{fig:full-communication-extended}, the User/Client system can provide new setpoints to the Modbus interface. Each tuple in the list contains a timestamp (first element) and the corresponding target setpoint for the actuator (second element).
+    \item Progress bar: Since the simulation may take significant time, a progress bar is included to monitor simulation progress conveniently.
+    \item Actuator position tracing: The Modelica model now returns the current actuator position. This position is retrieved in each loop iteration and added to the simulation trace, enhancing observability.
+    \item FSB tick function: The tick function ensures that each loop iteration takes exactly the time specified by the flow\_send\_rate in FSBConfig. Performance testing showed that a single simulation step takes approximately 5 ms on average, while the intended send rate is 250 ms, leaving ample margin. For more complex flow models, loop execution time may increase; therefore, it is recommended to perform additional performance testing when creating new models. This can be done by temporarily disabling the tick function to measure the average loop execution time.
+\end{itemize}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Images/generated/full-communication-extended}
+    \caption{Total interaction overview between all components extended}
+    \label{fig:full-communication-extended}
+\end{figure}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+\chapter{Simulation Setup}
+\label{ch:simulation-setup}
+
+\section{Flow Models}
+\label{sec:flow-models}
+
+\section{Python Configurations}
+\label{sec:python-configurations}
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
